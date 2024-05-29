@@ -29,19 +29,21 @@ HOST_DATA_DIR="./data"
 HOST_TMP_DIR="./tmp"
 NCBI_BLAST_PATH="ncbi-blast-2.13.0+/bin"
 SLURM_ARGS=(
- -N $((NNODES + 1))
+ -N $NNODES
  -p short
  --ntasks-per-node=48
  --cpus-per-task=1
  -A pn_cis240131
  --time ${ELAPSE}
- --exclusive
-)
+ )
 
 TMPFILE=$(mktemp)
 cat > $TMPFILE << EOF
 #!/bin/bash
 module load openmpi/gcc13.1.0/4.1.5
+
+mkdir -p tmp output
+
 echo "Splitting and Formatting Dataset..."
 ./mpiformatdb.sh ${HOST_DATA_DIR}/${DBFILE} $NNODES ${HOST_TMP_DIR} ${NCBI_BLAST_PATH} ${HOST_DATA_DIR} ${DBFILE}
 

@@ -18,7 +18,7 @@ HOSTS=($(scontrol show hostnames $SLURM_NODELIST))
   #rsync -avz ${DATASET_DIR}/segment_${FORMATTED_I}.fasta* ${WORKER_HOST}:/tmp/
 #done
 
-mpirun --map-by ppr:$NUM_WORKERS:node:pe=48 -np $NUM_WORKERS ./mpiblastp_workerProcess.sh $QUERY_FILE $NCBI_BLAST_PATH
+mpirun --map-by ppr:1:node:pe=48 ./mpiblastp_workerProcess.sh $QUERY_FILE $NCBI_BLAST_PATH
 
 
 > $MASTER_RESULT_FILE
