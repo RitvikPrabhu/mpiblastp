@@ -1,0 +1,4 @@
+data/*
+tmp/*
+output/*
+slurm-*.out
