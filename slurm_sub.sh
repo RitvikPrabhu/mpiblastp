@@ -6,7 +6,6 @@ NNODES=$3
 ELAPSE=${4:-30:00}
 TIME_LOG_FILE=${5:-"blastp_time.log"}
 BLASTP_OUTPUT=${6:-"blastp_output.fasta"}
-NTASKS=3
 
 USAGE="$0 \${DBFILE} \${QUERYFILE} \${NNODES} [ELAPSE] [TIME_LOG_FILE] [BLASTP_OUTPUT]"
 if [ -z ${NNODES} ]; then
@@ -30,13 +29,13 @@ HOST_DATA_DIR="./data"
 HOST_TMP_DIR="./tmp"
 NCBI_BLAST_PATH="ncbi-blast-2.13.0+/bin"
 SLURM_ARGS=(
- -N ${NNODES}
+ -N $((NNODES + 1))
  -p short
- --ntasks-per-node=${NTASKS}
+ --ntasks-per-node=48
  --cpus-per-task=1
  -A pn_cis240131
- --exclusive
  --time ${ELAPSE}
+ --exclusive
 )
 
 TMPFILE=$(mktemp)
@@ -44,9 +43,10 @@ cat > $TMPFILE << EOF
 #!/bin/bash
 module load openmpi/gcc13.1.0/4.1.5
 echo "Splitting and Formatting Dataset..."
-./mpiformatdb.sh ${HOST_DATA_DIR}/${DBFILE} $(((NNODES * NTASKS) - 1)) ${HOST_TMP_DIR} ${NCBI_BLAST_PATH} ${HOST_DATA_DIR} ${DBFILE}
+./mpiformatdb.sh ${HOST_DATA_DIR}/${DBFILE} $NNODES ${HOST_TMP_DIR} ${NCBI_BLAST_PATH} ${HOST_DATA_DIR} ${DBFILE}
 
-mpirun -np $(( NNODES * NTASKS )) ./mpiblastp.sh ${DBFILE} ${QUERYFILE} ${BLASTP_OUTPUT} ${NCBI_BLAST_PATH} ${NTASKS}
+./mpiblastp.sh $NNODES
+
 echo "BLAST job completed."
 EOF
 
