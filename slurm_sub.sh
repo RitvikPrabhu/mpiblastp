@@ -6,7 +6,7 @@ NNODES=$3
 ELAPSE=${4:-30:00}
 TIME_LOG_FILE=${5:-"blastp_time.log"}
 BLASTP_OUTPUT=${6:-"blastp_output.fasta"}
-NTASKS=48
+NTASKS=3
 
 USAGE="$0 \${DBFILE} \${QUERYFILE} \${NNODES} [ELAPSE] [TIME_LOG_FILE] [BLASTP_OUTPUT]"
 if [ -z ${NNODES} ]; then
@@ -28,7 +28,7 @@ fi
 HOST_OUTPUT_DIR="./output"
 HOST_DATA_DIR="./data"
 HOST_TMP_DIR="./tmp"
-NCBI_BLAST_PATH="/lustre/scratch/rprabhu/ncbi-blast-2.13.0+/bin"
+NCBI_BLAST_PATH="ncbi-blast-2.13.0+/bin"
 SLURM_ARGS=(
  -N ${NNODES}
  -p short
