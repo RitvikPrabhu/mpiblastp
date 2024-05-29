@@ -16,6 +16,11 @@ while [ "$current_state" != "SEARCH_COMPLETE" ]; do
       cp $fragment tmp/
     fi
     ${NCBI_BLAST_PATH}/blastp -query tmp/query_$OMPI_COMM_WORLD_RANK.fasta -db tmp/$(basename $fragment) -evalue 0.000001 -max_target_seqs 10 -outfmt 6 -num_threads $NTHREADS -out tmp/results_${OMPI_COMM_WORLD_RANK}_temp.fasta
+    # Count the number of lines in the BLASTP output file
+    line_count=$(wc -l < tmp/results_${OMPI_COMM_WORLD_RANK}_temp.fasta)
+
+    # Print the line count
+    echo "Rank: ${OMPI_COMM_WORLD_RANK}: The BLASTP output file has $line_count lines."
     sed -i "1i$fragment" tmp/results_${OMPI_COMM_WORLD_RANK}_temp.fasta
     mv tmp/results_${OMPI_COMM_WORLD_RANK}_temp.fasta tmp/results_$OMPI_COMM_WORLD_RANK.fasta
     echo "idle" > tmp/idle_$OMPI_COMM_WORLD_RANK

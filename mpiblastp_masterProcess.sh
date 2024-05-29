@@ -25,7 +25,6 @@ done
 
 # Master process logic
 while [ ${#unsearched[@]} -gt 0 ]; do
-
   for worker in "${workers[@]}"; do
     if [ ! -f "tmp/idle_$worker" ]; then
       continue
@@ -47,10 +46,8 @@ while [ ${#unsearched[@]} -gt 0 ]; do
   echo -n "" > ${HOST_OUTPUT_DIR}/${BLASTP_OUTPUT}
   for worker in "${workers[@]}"; do
     if [ -f "tmp/results_$worker.fasta" ]; then
-      #result=$(cat tmp/results_$worker)
-      #results+=("$result")
       tail -n +2 "tmp/results_$worker.fasta" >> ${HOST_OUTPUT_DIR}/${BLASTP_OUTPUT}
-      #fragment=$(echo "$result" | cut -d ' ' -f 1)
+      echo "Number of lines in final output: $(wc -l < ${HOST_OUTPUT_DIR}/${BLASTP_OUTPUT})"
       fragment=$(head -n 1 "tmp/results_$worker.fasta")
       unsearched=(${unsearched[@]/$fragment})
       rm tmp/results_$worker.fasta
@@ -61,22 +58,8 @@ done
 # Set barrier synchronization
 for worker in "${workers[@]}"; do
   echo "SEARCH_COMPLETE" > tmp/state_$worker
-done
-
-# Wait for all worker processes to reach the barrier
-while true; do
-  barrier_reached=1
-  for worker in "${workers[@]}"; do
-    current_state=$(cat tmp/state_$worker)
-    if [ "$current_state" != "SEARCH_COMPLETE" ]; then
-      barrier_reached=0
-      break
-    fi
-  done
-  if [ $barrier_reached -eq 1 ]; then
-    break
-  else
-    sleep 1
+  if [ -f "tmp/results_$worker.fasta" ]; then
+	  echo "ERROR: Seems like a file system error - tmp/results_$worker.fasta has not been deleted and has hence not been added to the final output file."
   fi
 done
 
